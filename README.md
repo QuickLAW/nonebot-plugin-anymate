@@ -22,46 +22,6 @@ AnymateTools是一款[NoneBot](https://nonebot.dev/)上使用的插件，可以�
 
 安装此插件后，在群聊/私聊可以使用，添加角色到数据库之后，可以查看角色信息，查看角色动态，催更（角色暂时还收不到），查看发现页动态等功能。可以通过群聊便捷的催促作者更新。
 
-## 💿 安装
-
-<details open>
-<summary>使用 nb-cli 安装</summary>
-在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
-
-    nb plugin install nonebot-plugin-anymate
-
-</details>
-
-<details>
-<summary>使用包管理器安装</summary>
-在 nonebot2 项目的插件目录下, 打开命令行, 根据你使用的包管理器, 输入相应的安装命令
-
-<details>
-<summary>pip</summary>
-
-    pip install nonebot-plugin-anymate
-</details>
-<details>
-<summary>pdm</summary>
-
-    pdm add nonebot-plugin-anymate
-</details>
-<details>
-<summary>poetry</summary>
-
-    poetry add nonebot-plugin-anymate
-</details>
-<details>
-<summary>conda</summary>
-
-    conda install nonebot-plugin-anymate
-</details>
-
-打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
-
-    plugins = ["nonebot_plugin_anymate"]
-
-</details>
 
 ## ⚙️ 配置
 
