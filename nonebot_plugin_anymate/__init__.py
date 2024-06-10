@@ -12,7 +12,8 @@ __plugin_meta__ = PluginMetadata(
     usage="使用 /any帮助 来查看指令",
     config=Config,
     supported_adapters=None,
-    type="application"
+    type="application",
+    homepage="https://github.com/QuickLAW/nonebot-plugin-anymate"
 )
 
 any_config = get_plugin_config(Config)
