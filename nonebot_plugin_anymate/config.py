@@ -11,4 +11,4 @@ class Config(BaseModel, extra=Extra.ignore):
             UUID text,
             mateId text
         )'''
-    _plugin_version = "1.1.5"
+    _plugin_version = "1.2.4"

@@ -26,11 +26,11 @@ any_help = on_command("anyhelp", aliases={"any帮助", "any"}, priority=100)
 
 @get_info.handle()
 async def get_info_func(args: Message = CommandArg()):
-    uuid = query_UUID_by_name(any_config.db_dir, any_config.info_table_name, str(args))
+    uuid = await query_UUID_by_name(any_config.db_dir, any_config.info_table_name, str(args))
     if not uuid:
         await get_info.finish(f"{args}目前为机器人未记录的角色")
     if len(uuid) > 1:
-        name_list = query_name_by_name(any_config.db_dir, any_config.info_table_name, str(args))
+        name_list = await query_name_by_name(any_config.db_dir, any_config.info_table_name, str(args))
         message = MessageSegment.text("查找到多个结果\n")
         for i in name_list:
             message += MessageSegment.text(i + '\n')
@@ -38,7 +38,7 @@ async def get_info_func(args: Message = CommandArg()):
         await get_info.finish(message)
     
     info = {'角色名': None, '账号ID': None, '角色ID': None, '年龄': None, '个人简介': None, 'mediaUrl': None}
-    info_result = api_get_info_func(uuid[0])
+    info_result = await api_get_info_func(uuid[0])
     info['角色名'] = info_result['item']['name']
     info['账号ID'] = info_result['item']['userId']
     info['角色ID'] = info_result['item']['id']
@@ -74,18 +74,18 @@ async def get_last_post_func(args: Message = CommandArg()):
         await get_last_post.send("超出最大数量限制！！")
         perPage = 5
 
-    mateId = query_mateId_by_name(any_config.db_dir, any_config.info_table_name, args_list[0])
+    mateId = await query_mateId_by_name(any_config.db_dir, any_config.info_table_name, args_list[0])
     if not mateId:
         await get_last_post.finish(f"{args}目前为机器人未记录的角色")
     if len(mateId) > 1:
-        name_list = query_name_by_name(any_config.db_dir, any_config.info_table_name, args_list[0])
+        name_list = await query_name_by_name(any_config.db_dir, any_config.info_table_name, args_list[0])
         message = MessageSegment.text("查找到多个角色\n")
         for i in name_list:
             message += MessageSegment.text(i + '\n')
         message += MessageSegment.text("请重新输入")
         await get_last_post.finish(message)
 
-    post_content = api_get_last_post(mateId, perPage)
+    post_content = await api_get_last_post(mateId, perPage)
 
     data = post_content['page']['data']
     info = {'dtCreate': [], 'mediazz': [], 'text': []}
@@ -142,7 +142,7 @@ async def get_search_content_func(args: Message = CommandArg()):
     if perPage > 20:
         await search.send("超出最大数量限制！！")
         perPage = 5
-    search_result = api_search_func(args_list[0], perPage)
+    search_result = await api_search_func(args_list[0], perPage)
 
     info = {'name': [], 'mateId': [], 'uuid': [], 'bio': [], 'type': [], 'mediaUrl': []}
     total = search_result['page']['total']
@@ -196,29 +196,29 @@ async def add_char_by_UUID_func(args: Message = CommandArg()):
     if not UUID:
         await add_char.finish("需要包含UUID！")
 
-    info_result = api_get_info_func(UUID)
+    info_result = await api_get_info_func(UUID)
     name = info_result['item']['name']
     mateId = info_result['item']['id']
 
-    insert_or_update_data(any_config.db_dir, any_config.info_table_name, name, UUID, mateId)
+    await insert_or_update_data(any_config.db_dir, any_config.info_table_name, name, UUID, mateId)
     await add_char.finish(f"{name} 已添加")
 
 
 @remind_update.handle()
 async def remind_update_func(args: Message = CommandArg()):
     name = str(args)
-    mateId = query_mateId_by_name(any_config.db_dir, any_config.info_table_name, name)
+    mateId = await query_mateId_by_name(any_config.db_dir, any_config.info_table_name, name)
     if not mateId:
         await remind_update.finish(f"{args}目前为机器人未记录的角色")
     if len(mateId) > 1:
-        name_list = query_name_by_name(any_config.db_dir, any_config.info_table_name, name)
+        name_list = await query_name_by_name(any_config.db_dir, any_config.info_table_name, name)
         message = MessageSegment.text("查找到多个结果\n")
         for i in name_list:
             message += MessageSegment.text(i + '\n')
         message += MessageSegment.text("请重新输入")
         await remind_update.finish(message)
 
-    post_content = api_get_last_post(mateId)
+    post_content = await api_get_last_post(mateId)
     dtCreate: str = post_content['page']['data'][0]['dtCreate']
 
     timezone_str = any_config.UTC
@@ -242,7 +242,8 @@ async def remind_update_func(args: Message = CommandArg()):
     days_difference = int(hours_difference // 24)
     days = ''
 
-    message = MessageSegment.text(query_name_by_name(any_config.db_dir, any_config.info_table_name, name)[0] + '\n')
+    name = await query_name_by_name(any_config.db_dir, any_config.info_table_name, name)
+    message = MessageSegment.text(name[0] + '\n')
     message += MessageSegment.text("最新更新时间为：" + formatted_time + '\n')
     if days_difference != 0:
         days = str(days_difference) + '天'
@@ -269,7 +270,7 @@ async def get_explore_func(args: Message = CommandArg()):
         
     perPage = int(perPage)
 
-    post_content = apt_get_explore_post(perPage)
+    post_content = await apt_get_explore_post(perPage)
     data = post_content['page']['data']
     
     info = {'name': [], 'mateId': [], 'uuid': [], 'type': [], 'mediaUrl': [], 'text': [], 'dtCreate': []}
