@@ -1,8 +1,9 @@
-import requests
+import httpx
+
 from .api import get_info_api1, get_last_post_api, search_api, get_explore_api
 
 # 通过uuid获取信息
-def api_get_info_func(UUID: str) -> dict:
+async def api_get_info_func(UUID: str) -> dict:
     """
     通过UUID获取用户信息。
     
@@ -17,16 +18,15 @@ def api_get_info_func(UUID: str) -> dict:
     headers = {
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
     }
-    info = {'角色名': None, '账号ID': None, '角色ID': None, '年龄': None, '个人简介': None}
-    
-    response = requests.get(url=url, headers=headers)
-    if response.status_code == 200:
-        result = response.json()
-        return result
-    return info
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url=url, headers=headers)
+        if response.status_code == 200:
+            result = response.json()
+            return result
 
 # 通过名称搜索
-def api_search_func(name: str, perPage: int = 5) -> dict:
+async def api_search_func(name: str, perPage: int = 5) -> dict:
     """
     通过名称搜索用户信息。
     
@@ -47,14 +47,15 @@ def api_search_func(name: str, perPage: int = 5) -> dict:
         "pagination[perPage]": f"{perPage}",
         "filter[query]": name
     }
-    
-    response = requests.get(url=url, headers=headers, params=params)
-    if response.status_code == 200:
-        result = response.json()
-        return result
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url=url, headers=headers, params=params)
+        if response.status_code == 200:
+            result = response.json()
+            return result
 
 # 通过mateId获取动态
-def api_get_last_post(mateId: str, perPage: int = 5) -> dict:
+async def api_get_last_post(mateId: str, perPage: int = 5) -> dict:
     """
     通过mateId获取用户的最新动态。
     
@@ -77,13 +78,14 @@ def api_get_last_post(mateId: str, perPage: int = 5) -> dict:
         "pagination[perPage]": perPage
     }
 
-    response = requests.get(url=url, params=params, headers=headers)
-    if response.status_code == 200:
-        result = response.json()
-        return result
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url=url, params=params, headers=headers)
+        if response.status_code == 200:
+            result = response.json()
+            return result
 
 # 获取发现页
-def apt_get_explore_post(perPage: int = 5) -> dict:
+async def apt_get_explore_post(perPage: int = 5) -> dict:
     """
     获取发现页的最新动态。
     
@@ -104,7 +106,8 @@ def apt_get_explore_post(perPage: int = 5) -> dict:
         "sort[order]": "desc"
     }
 
-    response = requests.get(url=url, params=params, headers=headers)
-    if response.status_code == 200:
-        result = response.json()
-        return result
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url=url, params=params, headers=headers)
+        if response.status_code == 200:
+            result = response.json()
+            return result
