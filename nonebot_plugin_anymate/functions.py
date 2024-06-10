@@ -8,15 +8,13 @@ from datetime import datetime, timezone
 import pytz
 
 
-from nonebot.plugin import on_command
-from nonebot import get_driver
+from nonebot.plugin import on_command, get_plugin_config
 from nonebot.adapters.onebot.v11.message import Message
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11.message import MessageSegment
 from nonebot.exception import ActionFailed
 
-global_config = get_driver().config
-any_config = Config.parse_obj(global_config)
+any_config = get_plugin_config(Config)
 
 get_info = on_command("角色信息", aliases={'信息'}, priority=108)
 get_last_post = on_command("最新动态", aliases={'动态'}, priority=107)
