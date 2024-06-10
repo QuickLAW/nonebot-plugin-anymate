@@ -48,22 +48,22 @@ AnymateTools是一款[NoneBot](https://nonebot.dev/)上使用的插件，可以�
 <summary>使用方法</summary>
 
 1. 先使用"/搜索 <角色名>"的指令查找对应的角色，可以获取到角色的UUID
-
 <img src="https://github.com/QuickLAW/nonebot-plugin-anymate/blob/main/img/101.jpg"  width="300" />
+
 指令：
 
     /搜索 白璃
 
 2. 使用"/添加角色 <UUID>"来将指定角色添加到数据库中
-
 <img src="https://github.com/QuickLAW/nonebot-plugin-anymate/blob/main/img/102.jpg"  width="300" />
+
 指令：
 
     /添加角色 5093d34b-3b29-4822-abd1-d39402faa6cf
 
 3. 之后就可以对指定角色使用"催更"、"动态"、"信息"等功能啦
-
 <img src="https://github.com/QuickLAW/nonebot-plugin-anymate/blob/main/img/103.jpg"  width="300" />
+
 指令：
 
     /催更 白璃
