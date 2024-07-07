@@ -1,5 +1,8 @@
+from nonebot import require
 from nonebot.adapters.onebot.v11.message import Message
 from nonebot.adapters.onebot.v11.bot import Bot
+
+require("nonebot_plugin_saa")
 from nonebot_plugin_saa import TargetQQPrivate, MessageFactory
 
 
