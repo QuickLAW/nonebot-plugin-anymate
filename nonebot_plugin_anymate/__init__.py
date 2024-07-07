@@ -1,8 +1,11 @@
-from .functions import *
+import asyncio
 
-from .tools import db_is_exist
+from .functions.functions import *
+from .tools import Tools
 from .config import Config
-from .sql_operate import creat_sql, creat_table
+from .sql_operate import SQL_Operate
+from .functions.login import *
+from .functions.check_in import *
 
 from nonebot.plugin import PluginMetadata, get_plugin_config
 
@@ -11,16 +14,25 @@ __plugin_meta__ = PluginMetadata(
     description="实现对anymate网站的简单帮助",
     usage="使用 /any帮助 来查看指令",
     config=Config,
-    supported_adapters=None,
+    supported_adapters=["~onebot.v11"],
     type="application",
-    homepage="https://github.com/QuickLAW/nonebot-plugin-anymate"
+    homepage="https://github.com/QuickLAW/nonebot-plugin-anymate",
 )
 
 any_config = get_plugin_config(Config)
 
-if db_is_exist(any_config.db_dir):
-    pass
-else:
+
+async def init():
     # 创建数据库和UUID表
-    creat_sql(any_config.db_dir)
-    creat_table(any_config.db_dir, any_config.info_table_name, any_config._info_table_sql)
+    await SQL_Operate.creat_sql(any_config.db_dir)
+    # 创建角色信息表
+    await SQL_Operate.creat_table(
+        any_config.db_dir, any_config.info_table_name, any_config._info_table_sql
+    )
+    # 创建账户信息表
+    await SQL_Operate.creat_table(
+        any_config.db_dir, any_config.user_table_name, any_config._user_table_sql
+    )
+
+
+asyncio.run(init())
