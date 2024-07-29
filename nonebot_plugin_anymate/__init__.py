@@ -21,7 +21,6 @@ __plugin_meta__ = PluginMetadata(
 
 any_config = get_plugin_config(Config)
 
-
 async def init():
     # 创建数据库和UUID表
     await SQL_Operate.creat_sql(any_config.db_dir)

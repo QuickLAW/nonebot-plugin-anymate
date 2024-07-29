@@ -7,3 +7,5 @@ code_api = "https://api.any-mate.com/v1/Api/User/0"
 
 get_login_token_api = "https://api.any-mate.com/v1/Api/UserHome"
 check_in_api = "https://api.any-mate.com/v1/Api/CoinQuestUser/CreateOne/0"
+upvote_api = "https://api.any-mate.com/v1/Api/EmojiVote/0"
+get_mate_page = "https://api.any-mate.com/v1/Api/MatePage"

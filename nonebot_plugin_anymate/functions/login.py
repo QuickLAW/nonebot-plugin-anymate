@@ -1,4 +1,4 @@
-from ..api_operate import api_get_login_token, api_login, api_post_code
+from ..api_operate import api_get_last_post, api_get_login_token, api_login, api_post_code, api_get_mate_page
 from ..tools import Tools
 from ..config import Config
 from ..sql_operate import SQL_Operate
@@ -16,6 +16,7 @@ any_config = get_plugin_config(Config)
 log_in = on_command("any登录", aliases={"anylogin"}, priority=110)
 
 
+# 进入登录流程
 @log_in.handle()
 async def any_login_func(event: Event):
     user_id = event.get_user_id()
@@ -23,6 +24,7 @@ async def any_login_func(event: Event):
     await log_in.send("请输入邮箱, 输入‘退出’结束登录流程: ")
 
 
+# 获取邮箱并发送验证码
 @log_in.got("email")
 async def get_email(event: Event, email: str = ArgStr()):
     user_id = event.get_user_id()
@@ -44,6 +46,7 @@ async def get_email(event: Event, email: str = ArgStr()):
         await log_in.finish(result)
 
 
+# 提交验证码
 @log_in.got("code")
 async def get_code(event: Event, code: str = ArgStr()):
     user_id = event.get_user_id()
@@ -63,33 +66,47 @@ async def get_code(event: Event, code: str = ArgStr()):
     info["paypel"] = result["item"]["paypal"]
     info["coinAmount"] = result["item"]["coinAmount"]
     info["coinAmountToday"] = result["item"]["coinAmountToday"]
+    
+    info["mateId"] = result['item']['mateId']
 
     if result["code"] == 200:
+        # 获取当前角色信息
+        mates_info, new_cookies_dict = await api_get_mate_page(cookies=cookies_dict)
+
+        try:
+            UUID = mates_info['page']['data'][0]['uuid']
+        except:
+            log_in.finish("角色未创建！请至少创建一个角色后再登录！")
+        
         message = MessageSegment.text(
             "账号信息\n用户名: " + str(info["username"]) + "\n"
         )
         message += MessageSegment.text("邮箱: " + str(info["email"]) + "\n")
-        message += MessageSegment.text("ID" + str(info["id"]) + "\n")
+        message += MessageSegment.text("ID: " + str(info["id"]) + "\n")
         message += MessageSegment.text("PayPal账号: " + str(info["paypel"]) + "\n")
         message += MessageSegment.text("硬币数量: " + str(info["coinAmount"]) + "\n")
         message += MessageSegment.text(
             "coinAmountToday: " + str(info["coinAmountToday"]) + "\n"
         )
+        message += MessageSegment.text("当前角色ID: " + str(info["mateId"]) + "\n")
+        message += MessageSegment.text("当前角色名: " + str(mates_info['page']['data'][0]['name']))
 
         del login_dict[user_id]
         remember_key = [k for k in cookies_dict if k.startswith("remember_web_")][0]
-        token = cookies_dict["XSRF-TOKEN"]
-        session = cookies_dict["anymate_session"]
         remember_web = cookies_dict[remember_key]
+        token = new_cookies_dict["XSRF-TOKEN"]
+        session = new_cookies_dict["anymate_session"]
 
         await SQL_Operate.insert_or_update_user_data(
-            any_config.db_dir,
-            any_config.user_table_name,
-            user_id,
-            token,
-            session,
-            remember_key,
-            remember_web,
+            db_dir=any_config.db_dir,
+            table_name=any_config.user_table_name,
+            token=token,
+            session=session,
+            mateId=info["mateId"],
+            UUID=UUID,
+            user_id=user_id,
+            remember_key=remember_key,
+            remember_web=remember_web,
         )
 
         await log_in.finish(message)

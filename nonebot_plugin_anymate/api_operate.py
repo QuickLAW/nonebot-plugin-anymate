@@ -10,6 +10,8 @@ from .api import (
     code_api,
     get_login_token_api,
     check_in_api,
+    upvote_api,
+    get_mate_page,
 )
 
 
@@ -28,7 +30,7 @@ async def api_get_info_func(UUID: str) -> dict:
 
     headers = {"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"}
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.get(url=url, headers=headers)
         if response.status_code == 200:
             result = response.json()
@@ -53,7 +55,7 @@ async def api_search_func(name: str, perPage: int = 5) -> dict:
     headers = {"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"}
     params = {"pagination[perPage]": f"{perPage}", "filter[query]": name}
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.get(url=url, headers=headers, params=params)
         if response.status_code == 200:
             result = response.json()
@@ -82,7 +84,7 @@ async def api_get_last_post(mateId: str, perPage: int = 5) -> dict:
         "pagination[perPage]": perPage,
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.get(url=url, params=params, headers=headers)
         if response.status_code == 200:
             result = response.json()
@@ -109,7 +111,7 @@ async def api_get_explore_post(perPage: int = 5) -> dict:
         "sort[order]": "desc",
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.get(url=url, params=params, headers=headers)
         if response.status_code == 200:
             result = response.json()
@@ -162,7 +164,7 @@ async def api_post_code(email: str, code: str, cookies) -> dict:
         "X-Xsrf-Token": cookies["XSRF-TOKEN"],
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.post(
             url=code_api, headers=headers, json=json_data, cookies=cookies
         )
@@ -175,12 +177,12 @@ async def api_post_code(email: str, code: str, cookies) -> dict:
             return {"code": 404}, {}
         if response.status_code == 419:
             return {"code": 419}, {}
-        return response.json(), {}
+        return {"code": response.status_code}, {}
 
 
 # 获取预登录token
 async def api_get_login_token():
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.get(get_login_token_api)
         cookies = response.cookies.jar
         cookies_dict = {cookie.name: unquote(cookie.value) for cookie in cookies}
@@ -196,7 +198,7 @@ async def api_check_in(cookies: dict):
         "X-Xsrf-Token": cookies["XSRF-TOKEN"],
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.post(
             url=check_in_api, headers=headers, json=json_data, cookies=cookies
         )
@@ -219,10 +221,73 @@ async def api_get_token_by_remember(cookies: dict):
 
     headers = {"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"}
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
         response = await client.get(
             get_login_token_api, cookies=cookies, headers=headers
         )
         cookies = response.cookies.jar
         cookies_dict = {cookie.name: unquote(cookie.value) for cookie in cookies}
         return cookies_dict
+
+
+# 点赞功能
+async def api_upvote(emojiId: int, replyId: int, UUID: str, cookies: dict):
+
+    json_data = {"emojiId": emojiId, "replyId": replyId, "mateId": UUID}
+
+    headers = {
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+        "X-Xsrf-Token": cookies["XSRF-TOKEN"],
+    }
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
+        response = await client.post(
+            url=upvote_api, headers=headers, json=json_data, cookies=cookies
+        )
+        if response.status_code == 200:
+            result: dict = response.json()
+            cookies = response.cookies.jar
+            cookies_dict: dict = {
+                cookie.name: unquote(cookie.value) for cookie in cookies
+            }
+            return result, cookies_dict
+        if response.status_code == 404:
+            return {"code": 404}, {}
+        if response.status_code == 400:
+            return {"code": 400}, {}
+        return {"code": response.status_code}, {}
+
+
+# 通过token获取账户mate信息
+async def api_get_mate_page(cookies: dict) -> dict:
+    """
+    通过token获取用户的最新动态。
+
+    参数:
+        cookies (dict): 存有token的cookies
+
+    返回:
+        dict: 包含最新动态的字典。如果请求失败，则返回None。
+    """
+    url = get_mate_page
+    headers = {
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+        "X-Xsrf-Token": cookies["XSRF-TOKEN"],
+        }
+    params = {
+        "sort[field]": "id",
+        "sort[order]": "desc",
+        "pagination[page]": "1",
+        "pagination[perPage]": "999"
+    }
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(timeout=10)) as client:
+        response = await client.get(url=url, params=params, headers=headers, cookies=cookies)
+        if response.status_code == 200:
+            result = response.json()
+            cookies = response.cookies.jar
+            cookies_dict = {cookie.name: unquote(cookie.value) for cookie in cookies}
+            return result, cookies_dict
+        else:
+            return {'code': response.status_code}, {}
+

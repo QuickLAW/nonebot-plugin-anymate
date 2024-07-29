@@ -3,9 +3,6 @@ from ..api_operate import (
     api_get_last_post,
     api_search_func,
     api_get_explore_post,
-    api_login,
-    api_post_code,
-    api_get_login_token,
 )
 from ..config import Config
 from ..sql_operate import SQL_Operate
@@ -13,7 +10,6 @@ from ..tools import Tools
 
 from datetime import datetime, timezone
 import pytz
-
 
 from nonebot.params import CommandArg
 from nonebot.plugin import on_command, get_plugin_config
@@ -387,7 +383,7 @@ async def get_explore_func(args: Message = CommandArg()):
 @any_help.handle()
 async def get_help_func(args: Message = CommandArg()):
     message = MessageSegment.text(
-        "🌟AnyMate小助手 " + "v" + any_config._plugin_version + "\n"
+        "🌟AnyMate小助手 " + "v" + any_config._plugin_version + "\n\n"
     )
     message += MessageSegment.text("🔹/anyhelp 展示此帮助\n")
     message += MessageSegment.text("🔸/信息 <角色名> 展示指定角色相关信息\n")
@@ -402,4 +398,6 @@ async def get_help_func(args: Message = CommandArg()):
     message += MessageSegment.text("🔹/发现 [数量] 展示指定数量的发现页帖子\n")
     message += MessageSegment.text("🔸/any登录 进入登录流程\n")
     message += MessageSegment.text("🔹/any签到 登录后可以进行手动签到\n")
+    message += MessageSegment.text("🔸/any签到 登录后可以进行手动每日点赞\n")
+    message += MessageSegment.text("欢迎使用插件哟~可以多多支持")
     await any_help.finish(message)
